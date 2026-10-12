@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>秋津手作り革工房 メニュー</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@500;700&display=swap">
+<style>
+/* Layout: one narrow phone column, product list -> configurator with true-scale egg preview -> cart bar fixed at bottom */
+:root{
+  --bg:#f3f5f4; --surface:#ffffff; --ink:#1c2a33; --muted:#5b6b73; --line:#d5dcdc;
+  --indigo:#23435a; --accent:#d2492a; --accent-ink:#ffffff; --sel:#e6eef3;
+  --mdf:#d9c4a1; --mdf-edge:#a88c62; --paper:#f4ede0; --engrave:#3a2a18; --ok:#2f7a4a;
+  --display:"Dela Gothic One","Zen Kaku Gothic New",system-ui,sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121a1f; --surface:#1b262d; --ink:#e7eef0; --muted:#9db0b8; --line:#2f3f48;
+  --indigo:#8fb6d1; --accent:#f06a48; --accent-ink:#1b1210; --sel:#24384a;
+  --mdf:#cdb48c; --mdf-edge:#8d7350; --paper:#e9dfcb; --engrave:#3a2a18; --ok:#7fc79a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121a1f; --surface:#1b262d; --ink:#e7eef0; --muted:#9db0b8; --line:#2f3f48;
+  --indigo:#8fb6d1; --accent:#f06a48; --accent-ink:#1b1210; --sel:#24384a;
+  --mdf:#cdb48c; --mdf-edge:#8d7350; --paper:#e9dfcb; --engrave:#3a2a18; --ok:#7fc79a; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;padding-inline:16px;padding-block:0 120px}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header{padding-block:20px 4px;display:flex;flex-direction:column;gap:4px}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--muted)}
+.subtitle{font-size:15px;font-weight:700;color:var(--accent);letter-spacing:.04em}
+h1{font-family:var(--display);font-weight:400;font-size:28px;line-height:1.25;margin:0;color:var(--indigo);text-wrap:balance}
+h2{font-size:17px;margin:0;font-weight:700;text-wrap:balance}
+h3{font-size:14px;margin:0;font-weight:700;color:var(--muted);letter-spacing:.04em}
+p{margin:0}
+.note{font-size:13px;color:var(--muted)}
+.proto{font-size:12px;border:1px dashed var(--accent);color:var(--accent);padding:6px 10px;border-radius:6px}
+details.sample{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+details.sample summary{cursor:pointer;font-weight:700;font-size:14px}
+details.sample img{border-radius:8px;margin-top:10px;display:block}
+.products{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:left;font:inherit;color:inherit;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-width:0}
+.pcard[aria-pressed="true"]{border-color:var(--indigo);box-shadow:inset 0 0 0 1px var(--indigo);background:var(--sel)}
+.pcard:disabled{cursor:default;opacity:.6}
+.pcard .glyph{width:36px;height:36px;border-radius:50% 50% 46% 46% / 58% 58% 42% 42%;display:grid;place-items:center;background:var(--mdf);color:var(--engrave);font-family:var(--display);font-size:16px}
+.pcard b{font-size:15px}
+.pcard span{font-size:12px;color:var(--muted)}
+.pcard .tmp{color:var(--accent)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:18px}
+.field{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--indigo);border-color:var(--indigo);color:var(--surface)}
+.chip small{opacity:.75;margin-left:4px}
+.chip.f-maru{font-family:"Zen Maru Gothic",sans-serif;font-weight:700}
+.chip.f-goth{font-weight:700}
+.preview{display:flex;justify-content:center;align-items:flex-end;gap:16px;flex-wrap:wrap;padding:4px 0}
+.preview figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:4px}
+.preview figcaption{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.preview svg{height:auto;max-width:100%}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tile{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:6px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;min-width:0}
+.tile img{width:100%;max-width:64px;height:58px;object-fit:contain;display:block}
+.tile span{font-size:12px;color:#3a3a3a}
+.tile[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 3px var(--accent)}
+.side{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.side label.tog{display:flex;align-items:center;gap:8px;font-weight:700;cursor:pointer}
+.side input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent)}
+textarea,input[type=text],input[type=tel],select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%}
+textarea{resize:vertical;line-height:1.5}
+.count{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.count.over{color:var(--accent)}
+.price{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);padding-top:12px;font-variant-numeric:tabular-nums}
+.price strong{font-size:20px}
+.btn{font:inherit;font-weight:700;border:0;border-radius:10px;padding:12px 16px;cursor:pointer;background:var(--accent);color:var(--accent-ink);width:100%}
+.btn.ghost{background:transparent;color:var(--indigo);border:1px solid var(--indigo)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.err{font-size:13px;color:var(--accent);min-height:1em}
+.toast{font-size:14px;font-weight:700;color:var(--ok);border:1px solid var(--ok);border-radius:8px;padding:8px 12px}
+.cart{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.cart li{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;gap:12px;align-items:flex-start;font-variant-numeric:tabular-nums}
+.cart li .thumb{flex:none;width:56px}
+.cart li .body{min-width:0;flex:1;font-size:13px;display:flex;flex-direction:column;gap:6px}
+.cart li .desc{white-space:pre-wrap;overflow-wrap:anywhere}
+.cart li b{font-size:14px}
+.qty{display:flex;align-items:center;gap:8px}
+.qty button{font:inherit;width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;font-size:16px}
+.qty output{min-width:2ch;text-align:center;font-weight:700}
+.line-end{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.x{font:inherit;font-size:12px;background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer}
+.req{color:var(--accent);font-size:11px;margin-left:4px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--indigo);color:var(--surface);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center}
+.bar-in{max-width:560px;width:100%;display:flex;gap:12px;align-items:center;justify-content:space-between;font-variant-numeric:tabular-nums}
+.bar button{font:inherit;font-weight:700;background:var(--surface);color:var(--indigo);border:0;border-radius:8px;padding:9px 16px;cursor:pointer}
+.done{text-align:center;align-items:center}
+.ticket{font-family:var(--display);font-size:44px;color:var(--accent);letter-spacing:.06em}
+pre{font-size:11px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;overflow-x:auto;text-align:left;margin:0;max-height:260px;width:100%}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.exs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.ex{flex:none;width:84px;font:inherit;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--ink)}
+.ex img{width:100%;height:92px;object-fit:contain;border-radius:6px;display:block;background:#fff}
+.ex span{font-size:11px;color:var(--muted)}
+.ex[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+.exbig{width:100%;max-width:360px;background:#fff;padding:8px;align-self:center;border-radius:12px;display:block}
+@media (max-width:380px){.tiles{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="wrap" id="app"></div>
+<div class="bar" id="bar" hidden><div class="bar-in"><span id="barText"></span><button id="toCart" type="button">カートを見る</button></div></div>
+
+<script>
+/* ===== 注文の送り先（Google Apps Script のウェブアプリURL）。空欄なら試作モード ===== */
+const ORDER_ENDPOINT = "";
+
+/* ===== 商品マスタ ===== */
+// 絵柄・枠の画像は線画の外形ぴったりで切り出し。ar = 幅÷高さ
+const DESIGNS = [
+  ["1","いぬ",.705],["2","いぬ",.935],["3","いぬ",.84],["4","いぬ",.867],["5","いぬ",.985],["6","いぬ",.712],["7","いぬ",1.031],
+  ["8","いぬ",.879],["9","ねこ",.721],["10","ねこ",.81],["11","うさぎ",.558],["12","とり",.717],["13","ハロウィン",.751]
+].map(([no,name,ar])=>({id:no, name:`${no} ${name}`, img:`img/d${no}.png`, ar}));
+const FRAMES = [["A",1.136],["B",1.231],["C",1.106],["D",1.147],["E",1.038],["F",1.049]]
+  .map(([k,ar])=>({id:k, name:`枠${k}`, img:`img/f${k}.png`, ar}));
+const FONTS = [{id:"goth",name:"ゴシック",css:"'Zen Kaku Gothic New',sans-serif"},{id:"maru",name:"丸文字",css:"'Zen Maru Gothic',sans-serif"}];
+// 完成品のスキャン画像から切り出した塗り例。size: l/s, d: 絵柄番号, f: 枠
+const EXAMPLES = [
+  [1,"l","1","D"],[2,"l","4","C"],[3,"l","12","E"],[4,"l","5","D"],[5,"l","12","E"],
+  [6,"l","4","C"],[7,"l","6","A"],[8,"l","7","E"],[9,"l","2","B"],[10,"l","6","A"],
+  [11,"l","9","C"],[12,"l","1","B"],[13,"l","10","A"],[14,"l","10","D"],[15,"l","10","A"],
+  [16,"l","9","C"],[17,"l","8","E"],[18,"l","1","D"],[19,"l","1","B"],[20,"l","13","F"],
+  [21,"l","3","A"],[22,"l","11","B"],[23,"s","12",null],[24,"s","13",null],[25,"s","9",null],[26,"s","4",null]
+].map(([n,size,d,f])=>({img:`ex/e${n}.jpg`,size,d,f}));
+const STYLES = [{id:"fill",name:"塗りつぶし"},{id:"outline",name:"中抜き"}];
+
+/* 卵形プレートの配置（単位mm、上端からの位置）
+   frameH: 枠の高さ / frameY: 枠の中心（文字あり・なし）/ designH: 絵柄の高さ / designDy: 枠の中心から絵柄をずらす量
+   text: 表の文字の1行目ベースライン位置と文字サイズ */
+const PLATES = {
+  l:{w:95,h:107,hole:{y:9,r:2.5}, frameH:70, frameY:{text:50,plain:57}, designH:41, designDy:3, // plain: 枠の下端が下から15mm
+     text:{y:{1:84,2:81}, size:5.5, gap:7}, back:{cy:56, size:3.9, gap:5.6}},
+  s:{w:60,h:68,hole:{y:6,r:2}, frameH:0, designH:43, designY:{text:31,plain:37},
+     text:{y:{1:62}, size:3.8, gap:5}, back:{cy:37, size:4.2, gap:6}}
+};
+
+// 文字入れ：表・裏それぞれ一律の追加料金。行数と1行の文字数はサイズごと
+const CATALOG = [
+  {id:"nurie", name:"板ぬり絵", glyph:"絵", desc:"卵形MDFに絵柄と枠を彫刻",
+   variants:[
+     {id:"l",name:"大",dim:"幅95×高さ107mm",price:500,frame:true, engrave:{fee:100, front:{lines:2,chars:12}, back:{lines:5,chars:20}}},
+     {id:"s",name:"小",dim:"幅60×高さ68mm",price:300,frame:false,engrave:{fee:100, front:{lines:1,chars:12}, back:{lines:5,chars:10}}}
+   ]},
+  {id:"pettag", name:"ペットタグ彫刻", glyph:"札", desc:"準備中", soon:true, variants:[]},
+  // ↓ここから下は仮の内容（未確定）
+  {id:"toy", name:"3Dプリント玩具", glyph:"玩", desc:"内容は準備中（仮）", tmp:true,
+   variants:[{id:"tombo",name:"動くとんぼ",price:300},{id:"dino",name:"関節恐竜",price:500}],
+   colors:["赤","青","黄","緑","白"]},
+  {id:"leather", name:"革製品アウトレット", glyph:"革", desc:"内容は準備中（仮）", tmp:true,
+   variants:[{id:"key",name:"キーホルダー",price:800,stock:6},{id:"card",name:"カードケース",price:2000,stock:3}]}
+];
+/* ===================================================================== */
+
+const yen = n => "¥" + n.toLocaleString("ja-JP");
+const $ = (s, r=document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const len = s => [...s].length;
+const linesOf = s => s.replace(/\r/g,"").split("\n");
+let showColor = false, cart = [], view = "shop", cur = null, toast = "";
+
+const prodOf = cfg => CATALOG.find(x=>x.id===cfg.pid);
+const varOf = cfg => prodOf(cfg).variants.find(v=>v.id===cfg.variant);
+const isEgg = cfg => cfg.pid==="nurie";
+
+function newConfig(p){
+  const v=p.variants[0];
+  return {pid:p.id, variant:v.id, design:null, frame:v.frame?FRAMES[0].id:null, font:"goth", style:"fill",
+          engFront:false, engBack:false, front:"", back:"", color:p.colors?p.colors[0]:null, qty:1, tint:randTint()};
+}
+/* 色鉛筆ぬりのイメージ（背景だけ）。色と筆致は毎回ランダム */
+const PENCILS=["#f2a65a","#f19bb6","#9fd8b8","#9cc8ec","#f4dc63","#c3a6e0","#f5ab8c","#b9db7c","#a8d5d6"];
+const randTint=()=>({c:Math.floor(Math.random()*PENCILS.length), s:Math.floor(Math.random()*999)+1, r:Math.round(Math.random()*30-15)});
+let svgSeq=0;
+function pencilBg(t,cx,cy,rx,ry){
+  const id="pc"+(++svgSeq), col=PENCILS[t.c];
+  return `<defs>
+    <radialGradient id="${id}g"><stop offset="0" stop-color="${col}" stop-opacity=".95"/><stop offset=".72" stop-color="${col}" stop-opacity=".85"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></radialGradient>
+    <filter id="${id}f" x="-20%" y="-20%" width="140%" height="140%" filterUnits="objectBoundingBox">
+      <feTurbulence type="fractalNoise" baseFrequency="0.12 2.2" numOctaves="2" seed="${t.s}" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.4 0 0 0 -0.55" result="a"/>
+      <feComposite in="SourceGraphic" in2="a" operator="in" result="t"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.18" numOctaves="2" seed="${t.s+7}" result="w"/>
+      <feDisplacementMap in="t" in2="w" scale="3.5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter></defs>
+    <g transform="rotate(${-35+t.r} ${cx} ${cy})"><ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" transform="rotate(${35-t.r} ${cx} ${cy})" fill="url(#${id}g)" filter="url(#${id}f)"/></g>`;
+}
+const unitPrice = cfg => { const v=varOf(cfg); return v.price + (v.engrave?((cfg.engFront?v.engrave.fee:0)+(cfg.engBack?v.engrave.fee:0)):0); };
+const linePrice = cfg => unitPrice(cfg)*cfg.qty;
+function sideProblem(text,lim,label){
+  if(!text.trim()) return `${label}の文字を入力してください`;
+  const ls=linesOf(text);
+  if(ls.length>lim.lines) return `${label}は${lim.lines}行までです`;
+  const i=ls.findIndex(l=>len(l)>lim.chars);
+  if(i>=0) return `${label}の${i+1}行目が${lim.chars}文字を超えています`;
+  return null;
+}
+function problems(cfg){
+  const v=varOf(cfg), out=[];
+  if(isEgg(cfg) && !cfg.design) out.push("絵柄を選んでください");
+  if(v.frame && !cfg.frame) out.push("枠を選んでください");
+  if(v.engrave){
+    if(cfg.engFront){const e=sideProblem(cfg.front,v.engrave.front,"表");if(e)out.push(e);}
+    if(cfg.engBack){const e=sideProblem(cfg.back,v.engrave.back,"裏");if(e)out.push(e);}
+  }
+  return out;
+}
+
+/* 卵形プレート（mm座標）。表示倍率 px/mm を指定 */
+function eggPath(W,H){
+  const r=n=>+n.toFixed(2);
+  return `M${r(W/2)} 0C${r(W*.78)} 0 ${W} ${r(H*.33)} ${W} ${r(H*.6)}C${W} ${r(H*.84)} ${r(W*.78)} ${H} ${r(W/2)} ${H}`+
+         `C${r(W*.22)} ${H} 0 ${r(H*.84)} 0 ${r(H*.6)}C0 ${r(H*.33)} ${r(W*.22)} 0 ${r(W/2)} 0Z`;
+}
+function img(o,cx,cy,h){ const w=h*o.ar; return `<image href="${o.img}" x="${(cx-w/2).toFixed(2)}" y="${(cy-h/2).toFixed(2)}" width="${w.toFixed(2)}" height="${h}"/>`; }
+function textLines(ls,x,y0,size,gap,cfg){
+  const font=FONTS.find(f=>f.id===cfg.font).css;
+  const paint=cfg.style==="outline"?`fill:none;stroke:var(--engrave);stroke-width:${(size*0.06).toFixed(2)}`:"fill:var(--engrave)";
+  return ls.map((l,i)=>`<text x="${x}" y="${(y0+i*gap).toFixed(2)}" text-anchor="middle" style="font-family:${font};font-weight:700;font-size:${size}px;${paint}">${esc(l)}</text>`).join("");
+}
+function eggSvg(cfg, side, pxPerMm){
+  const v=varOf(cfg), P=PLATES[v.id], cx=P.w/2;
+  const d=DESIGNS.find(x=>x.id===cfg.design), f=FRAMES.find(x=>x.id===cfg.frame);
+  const on=side==="front"?cfg.engFront:cfg.engBack, lim=v.engrave[side];
+  const ls=on?linesOf(side==="front"?cfg.front:cfg.back).slice(0,lim.lines).filter((l,i,a)=>l||i<a.length-1):[];
+  const hasText=ls.some(l=>l.trim());
+  let art="";
+  if(side==="front"){
+    const color=cfg.tint&&showColor;
+    if(P.frameH){
+      const fy=hasText?P.frameY.text:P.frameY.plain;
+      if(color&&d) art+=pencilBg(cfg.tint,cx,fy+P.designDy,P.designH*.68,P.designH*.68);
+      if(f) art+=img(f,cx,fy,P.frameH);
+      if(d) art+=img(d,cx,fy+P.designDy,P.designH);
+    }else if(d){
+      const dy=hasText?P.designY.text:P.designY.plain;
+      if(color) art+=pencilBg(cfg.tint,cx,dy,P.w*.44,P.designH*.6);
+      art+=img(d,cx,dy,P.designH);
+    }
+    if(hasText){ const y0=P.text.y[ls.length]??P.text.y[1]; art+=textLines(ls,cx,y0,P.text.size,P.text.gap,cfg); }
+  }else if(hasText){
+    const y0=P.back.cy-(ls.length-1)*P.back.gap/2+P.back.size*.35;
+    art+=textLines(ls,cx,y0,P.back.size,P.back.gap,cfg);
+  }
+  return `<svg viewBox="-1 -1 ${P.w+2} ${P.h+2}" width="${Math.round((P.w+2)*pxPerMm)}" role="img" aria-label="${side==="front"?"表":"裏"}のイメージ">
+    <path d="${eggPath(P.w,P.h)}" style="fill:var(--mdf);stroke:var(--mdf-edge);stroke-width:.6"/>
+    <circle cx="${cx}" cy="${P.hole.y}" r="${P.hole.r}" style="fill:var(--surface);stroke:var(--mdf-edge);stroke-width:.4"/>
+    ${art}</svg>`;
+}
+
+let bigEx=null;
+function examplesHtml(){
+  const big=cur.variant==="l", d=cur.design, f=big?cur.frame:null;
+  const score=e=>(d&&e.d===d?4:0)+(f&&e.f===f?2:0)+(e.size===cur.variant?1:0);
+  let list=EXAMPLES.map(e=>({e,s:score(e)})).filter(x=>x.s>=2).sort((a,b)=>b.s-a.s);
+  const generic=!list.length;
+  if(generic) list=EXAMPLES.filter(e=>e.size===cur.variant).slice(0,6).map(e=>({e,s:0}));
+  list=list.slice(0,8);
+  const tag=e=>{const sd=d&&e.d===d, sf=f&&e.f===f; return sd&&sf?"絵柄＋枠":sd?"同じ絵柄":sf?"同じ枠":(e.size==="s"?"小":"大");};
+  const sel=list.find(x=>x.e.img===bigEx);
+  return `<h3>塗り例${generic?"":"（同じ絵柄・枠で塗ったもの）"}</h3>
+    <div class="exs">${list.map(({e})=>`<button type="button" class="ex" data-ex="${e.img}" aria-pressed="${e.img===bigEx}"><img src="${e.img}" alt="塗り例" loading="lazy"><span>${tag(e)}</span></button>`).join("")}</div>
+    ${sel?`<img class="exbig" src="${sel.e.img}" alt="塗り例の拡大">`:`<span class="note">写真をタップすると大きく表示します。</span>`}`;
+}
+function render(){
+  const app=$("#app");
+  if(view==="cart"){ renderCart(app); return; }
+  const p=cur?prodOf(cur):null;
+  app.innerHTML=`
+  <header>
+    <h1>秋津手作り革工房<br>メニュー</h1>
+    <p class="subtitle">秋津まつり 2026 ブース＃18</p>
+    <p class="note">商品を選んでカートに入れてください。何枚でもまとめて注文できます。注文後に表示される番号をブースでお伝えください。</p>
+  </header>
+  <p class="proto">試作版：送信してもまだどこにも届きません。板ぬり絵以外は仮の内容です。</p>
+  ${toast?`<p class="toast" role="status">${esc(toast)}</p>`:""}
+  <details class="sample"><summary>板ぬり絵の完成例を見る</summary>
+    <img src="img/sample.jpg" alt="レーザー彫刻した卵形プレートに色を塗った完成例" loading="lazy"></details>
+  <section class="field">
+    <h2>商品をえらぶ</h2>
+    <div class="products">${CATALOG.map(x=>`
+      <button type="button" class="pcard" id="p-${x.id}" data-p="${x.id}" aria-pressed="${!!p&&p.id===x.id}" ${x.soon?"disabled":""}>
+        <span class="glyph">${x.glyph}</span><b>${x.name}</b><span class="${x.tmp||x.soon?"tmp":""}">${x.desc}</span>
+        ${x.variants.length?`<span>${yen(Math.min(...x.variants.map(v=>v.price)))}〜</span>`:""}
+      </button>`).join("")}</div>
+  </section>
+  ${p?configHtml(p):""}`;
+  toast="";
+  app.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{cur=newConfig(CATALOG.find(x=>x.id===b.dataset.p));render();$("#cfg").scrollIntoView({behavior:"smooth",block:"start"});});
+  if(p) bindConfig();
+  updateBar();
+}
+
+const PX=1.9; // プレビューの表示倍率（px/mm）
+function previewHtml(){
+  const v=varOf(cur), P=PLATES[v.id];
+  return `<figure>${eggSvg(cur,"front",PX)}<figcaption>表　${P.w}×${P.h}mm</figcaption></figure>
+    ${cur.engBack?`<figure>${eggSvg(cur,"back",PX)}<figcaption>裏</figcaption></figure>`:""}`;
+}
+
+function configHtml(p){
+  const v=varOf(cur), probs=problems(cur), egg=isEgg(cur);
+  const sideBox=(k,label)=>{
+    const lim=v.engrave[k], on=k==="front"?cur.engFront:cur.engBack, val=cur[k];
+    return `<div class="side">
+      <label class="tog"><input type="checkbox" id="on-${k}" data-on="${k}" ${on?"checked":""}>${label}に文字を入れる<small class="note">+${yen(v.engrave.fee)}</small></label>
+      <span class="note">最大${lim.lines}行・1行${lim.chars}文字まで</span>
+      ${on?`<textarea id="t-${k}" data-t="${k}" rows="${lim.lines}" placeholder="${k==="front"?"例：Alice":"例：2026.10 秋津まつり"}">${esc(val)}</textarea>
+      <span class="count" id="cnt-${k}">${countText(val,lim)}</span>`:""}
+    </div>`;
+  };
+  return `
+  <section class="panel" id="cfg">
+    <h2>${p.name}の内容</h2>
+    <div class="field"><h3>${egg?"サイズ":"種類"}</h3>
+      <div class="row">${p.variants.map(x=>`<button type="button" class="chip" data-v="${x.id}" aria-pressed="${x.id===cur.variant}">${x.name}<small>${yen(x.price)}${x.stock!=null?` 残${x.stock}`:""}</small></button>`).join("")}</div>
+      ${egg?`<p class="note">${v.dim}。${v.frame?"大は絵柄と枠を選べます。":"小は絵柄のみで、枠はつきません。"}</p>`:""}
+    </div>
+    ${egg?`<div class="preview" id="preview">${previewHtml()}</div>
+    <div class="row" style="justify-content:center;align-items:center">
+      <button type="button" class="chip" id="retint">ぬり絵イメージの色を変える</button>
+      <label class="note" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="showColor" ${showColor?"checked":""}>色つきで表示</label></div>
+    <p class="note" style="text-align:center;margin-top:-10px">色はイメージです。実際の彫刻は線だけで、色はご自身で塗ります。</p>
+    <div class="field" id="examples">${examplesHtml()}</div>
+    <div class="field"><h3>絵柄（1つ選んでください）</h3>
+      <div class="tiles">${DESIGNS.map(d=>`<button type="button" class="tile" data-d="${d.id}" aria-pressed="${d.id===cur.design}"><img src="${d.img}" alt=""><span>${d.name}</span></button>`).join("")}</div>
+    </div>`:""}
+    ${v.frame?`<div class="field"><h3>枠のデザイン</h3>
+      <div class="tiles">${FRAMES.map(f=>`<button type="button" class="tile" data-f="${f.id}" aria-pressed="${f.id===cur.frame}"><img src="${f.img}" alt=""><span>${f.name}</span></button>`).join("")}</div>
+    </div>`:""}
+    ${p.colors?`<div class="field"><h3>色</h3><div class="row">${p.colors.map(c=>`<button type="button" class="chip" data-c="${c}" aria-pressed="${c===cur.color}">${c}</button>`).join("")}</div></div>`:""}
+    ${v.engrave?`<div class="field"><h3>文字入れ（表・裏それぞれ +${yen(v.engrave.fee)}）</h3>${sideBox("front","表")}${sideBox("back","裏")}
+      ${cur.engFront||cur.engBack?`
+      <h3>書体</h3><div class="row">${FONTS.map(f=>`<button type="button" class="chip f-${f.id}" data-font="${f.id}" aria-pressed="${f.id===cur.font}">${f.name}</button>`).join("")}</div>
+      <h3>文字の彫り方</h3><div class="row">${STYLES.map(s=>`<button type="button" class="chip" data-style="${s.id}" aria-pressed="${s.id===cur.style}">${s.name}</button>`).join("")}</div>`:""}
+    </div>`:""}
+    <div class="field"><h3>枚数</h3><div class="qty">
+      <button type="button" data-qd="-1" aria-label="1枚減らす">−</button><output id="qty">${cur.qty}</output><button type="button" data-qd="1" aria-label="1枚増やす">＋</button>
+      <span class="note">同じ内容で${cur.qty}${egg?"枚":"個"}</span></div></div>
+    <div class="price"><span>小計</span><strong id="sub">${yen(linePrice(cur))}</strong></div>
+    <p class="err" id="err">${probs[0]||""}</p>
+    <button type="button" class="btn" id="add" ${probs.length?"disabled":""}>カートに入れる</button>
+  </section>`;
+}
+function countText(val,lim){
+  const ls=linesOf(val);
+  return ls.map((l,i)=>`${i+1}行目 ${len(l)}/${lim.chars}`).join("　") + (ls.length>lim.lines?`（${lim.lines}行まで）`:"");
+}
+function refreshLive(){
+  const probs=problems(cur);
+  $("#err").textContent=probs[0]||""; $("#add").disabled=!!probs.length; $("#sub").textContent=yen(linePrice(cur));
+  const pv=$("#preview"); if(pv) pv.innerHTML=previewHtml();
+}
+function bindConfig(){
+  const cfg=$("#cfg"), max=p=>p;
+  cfg.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{
+    cur.variant=b.dataset.v; bigEx=null; const v=varOf(cur);
+    cur.frame=v.frame?(cur.frame||FRAMES[0].id):null; render();});
+  cfg.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{cur.design=b.dataset.d;cur.tint=randTint();bigEx=null;render();});
+  cfg.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{bigEx=bigEx===b.dataset.ex?null:b.dataset.ex;$("#examples").innerHTML=examplesHtml();bindConfig();});
+  const rt=$("#retint"); if(rt) rt.onclick=()=>{cur.tint=randTint();refreshLive();};
+  const sc=$("#showColor"); if(sc) sc.onchange=()=>{showColor=sc.checked;refreshLive();};
+  cfg.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{cur.frame=b.dataset.f;bigEx=null;render();});
+  cfg.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{cur.color=b.dataset.c;render();});
+  cfg.querySelectorAll("[data-font]").forEach(b=>b.onclick=()=>{cur.font=b.dataset.font;render();});
+  cfg.querySelectorAll("[data-style]").forEach(b=>b.onclick=()=>{cur.style=b.dataset.style;render();});
+  cfg.querySelectorAll("[data-qd]").forEach(b=>b.onclick=()=>{cur.qty=Math.max(1,Math.min(20,cur.qty+ +b.dataset.qd));render();});
+  cfg.querySelectorAll("[data-on]").forEach(b=>b.onchange=()=>{cur[b.dataset.on==="front"?"engFront":"engBack"]=b.checked;render();});
+  cfg.querySelectorAll("[data-t]").forEach(inp=>inp.oninput=()=>{
+    const k=inp.dataset.t, lim=varOf(cur).engrave[k]; cur[k]=inp.value;
+    const c=$("#cnt-"+k); c.textContent=countText(inp.value,lim); c.classList.toggle("over",!!sideProblem(inp.value||" ",lim,""));
+    refreshLive();});
+  $("#add").onclick=()=>{
+    cart.push(JSON.parse(JSON.stringify(cur)));
+    toast=`カートに入れました（${cartCount()}点）。続けて選ぶか、下の「カートを見る」から注文へ進めます。`;
+    cur=newConfig(prodOf(cur)); cur.variant=cart[cart.length-1].variant; if(!varOf(cur).frame) cur.frame=null;
+    render(); window.scrollTo({top:0,behavior:"smooth"});};
+}
+
+/* スプレッドシートの1行＝カートの1項目 */
+function rowOf(cfg){
+  const p=prodOf(cfg), v=varOf(cfg), font=FONTS.find(f=>f.id===cfg.font).name, st=STYLES.find(s=>s.id===cfg.style).name;
+  const eng=cfg.engFront||cfg.engBack;
+  return {商品:p.name, サイズ:v.name, 絵柄:cfg.design?DESIGNS.find(d=>d.id===cfg.design).name:"", 枠:cfg.frame||"",
+    色:cfg.color||"", 表の文字:cfg.engFront?cfg.front:"", 裏の文字:cfg.engBack?cfg.back:"",
+    書体:eng?font:"", 彫り方:eng?st:"", 枚数:cfg.qty, 単価:unitPrice(cfg), 小計:linePrice(cfg)};
+}
+function describe(cfg){
+  const r=rowOf(cfg), parts=[r.サイズ];
+  if(r.絵柄) parts.push("絵柄 "+r.絵柄);
+  if(r.枠) parts.push("枠"+r.枠);
+  if(r.色) parts.push("色 "+r.色);
+  let s=parts.join(" / ");
+  if(r.表の文字) s+=`\n表「${linesOf(r.表の文字).join(" ⏎ ")}」`;
+  if(r.裏の文字) s+=`\n裏「${linesOf(r.裏の文字).join(" ⏎ ")}」`;
+  if(r.書体) s+=`\n${r.書体}・${r.彫り方}`;
+  return s;
+}
+const total=()=>cart.reduce((s,c)=>s+linePrice(c),0);
+const cartCount=()=>cart.reduce((s,c)=>s+c.qty,0);
+function updateBar(){
+  $("#bar").hidden=!cart.length||view!=="shop";
+  $("#barText").textContent=`カート ${cartCount()}点　${yen(total())}`;
+}
+$("#toCart").onclick=()=>{view="cart";render();window.scrollTo(0,0);};
+
+function renderCart(app){
+  const name=$("#name")?.value??"", tel=$("#tel")?.value??"";
+  app.innerHTML=`
+  <header><span class="eyebrow">カート</span><h1>ご注文内容</h1></header>
+  <ul class="cart">${cart.map((c,i)=>`<li>
+      ${isEgg(c)?`<div class="thumb">${eggSvg(c,"front",.55)}</div>`:""}
+      <div class="body"><b>${esc(prodOf(c).name)}</b><span class="desc">${esc(describe(c))}</span>
+        <div class="line-end"><div class="qty"><button type="button" data-cq="${i}" data-d="-1" aria-label="減らす">−</button><output>${c.qty}</output><button type="button" data-cq="${i}" data-d="1" aria-label="増やす">＋</button></div>
+        <strong>${yen(linePrice(c))}</strong><button type="button" class="x" data-rm="${i}">削除</button></div></div></li>`).join("")}</ul>
+  <div class="price"><span>合計 ${cartCount()}点</span><strong>${yen(total())}</strong></div>
+  <form class="panel" id="form" novalidate>
+    <h2>お客さま情報</h2>
+    <label class="field" style="gap:4px"><span class="note">お名前<span class="req">必須</span></span><input type="text" id="name" required autocomplete="name" value="${esc(name)}"></label>
+    <label class="field" style="gap:4px"><span class="note">電話番号<span class="req">必須</span></span><input type="tel" id="tel" required autocomplete="tel" inputmode="tel" placeholder="090-1234-5678" value="${esc(tel)}"></label>
+    <label class="field" style="gap:4px"><span class="note">受け取り方法</span>
+      <select id="pickup"><option>当日ブースで受け取り</option><option>後日発送（送料別）</option></select></label>
+    <p class="err" id="ferr"></p>
+    <button class="btn" type="submit">注文を送信</button>
+    <button class="btn ghost" type="button" id="back">商品を追加する</button>
+  </form>`;
+  app.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{cart.splice(+b.dataset.rm,1);if(!cart.length)view="shop";render();});
+  app.querySelectorAll("[data-cq]").forEach(b=>b.onclick=()=>{const c=cart[+b.dataset.cq];c.qty=Math.max(1,Math.min(20,c.qty+ +b.dataset.d));render();});
+  $("#back").onclick=()=>{view="shop";render();};
+  $("#form").onsubmit=e=>{
+    e.preventDefault();
+    const nm=$("#name").value.trim(), tl=$("#tel").value.trim(), digits=tl.replace(/[-ー－\s()]/g,"").replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));
+    if(!nm){ $("#ferr").textContent="お名前を入力してください"; $("#name").focus(); return; }
+    if(!/^0\d{9,10}$/.test(digits)){ $("#ferr").textContent="電話番号を数字10〜11桁で入力してください（例：090-1234-5678）"; $("#tel").focus(); return; }
+    const order={お名前:nm,電話番号:digits,受け取り:$("#pickup").value,明細:cart.map(rowOf),合計:total()};
+    const btn=$("#form button[type=submit]");
+    const finish=(no,sent)=>{
+      view="done";
+      app.innerHTML=`<section class="panel done">
+        <span class="eyebrow">ご注文ありがとうございます</span>
+        <span class="note">受付番号</span><span class="ticket">${esc(no)}</span>
+        <p>この画面をブースのスタッフにお見せください。お会計は受け取り時です。</p>
+        ${sent?"":`<p class="proto">試作版のため、実際には送信されていません。本番では明細1件ごとにスプレッドシートへ1行追加されます。</p>
+        <pre>${esc(JSON.stringify(order,null,2))}</pre>`}
+        <button class="btn ghost" type="button" id="again">最初に戻る</button></section>`;
+      $("#bar").hidden=true;
+      $("#again").onclick=()=>{cart=[];cur=null;view="shop";render();window.scrollTo(0,0);};
+    };
+    if(!ORDER_ENDPOINT){ finish("A-"+String(Math.floor(Math.random()*900)+100),false); return; }
+    btn.disabled=true; btn.textContent="送信中…"; $("#ferr").textContent="";
+    // text/plain で送ると Apps Script でも事前確認なしで受け付けられる
+    fetch(ORDER_ENDPOINT,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(order)})
+      .then(r=>r.json()).then(res=>{ if(!res.ok) throw new Error(res.error||"error"); finish(res.orderNo,true); })
+      .catch(()=>{ btn.disabled=false; btn.textContent="注文を送信"; $("#ferr").textContent="送信できませんでした。電波の良い場所でもう一度お試しいただくか、スタッフにお声がけください。"; });
+  };
+  updateBar();
+}
+
+/* 初期表示：板ぬり絵（大）を選んだ状態で開く */
+cur=newConfig(CATALOG[0]); cur.design="9"; cur.frame="C";
+render();
+</script>
+</body>
+</html>
