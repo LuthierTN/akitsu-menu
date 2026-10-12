@@ -428,9 +428,7 @@ function renderCart(app){
     <h2>お客さま情報</h2>
     <label class="field" style="gap:4px"><span class="note">お名前<span class="req">必須</span></span><input type="text" id="name" required autocomplete="name" value="${esc(name)}"></label>
     <label class="field" style="gap:4px"><span class="note">電話番号<span class="req">必須</span></span><input type="tel" id="tel" required autocomplete="tel" inputmode="tel" placeholder="090-1234-5678" value="${esc(tel)}"></label>
-    <label class="field" style="gap:4px"><span class="note">受け取り方法</span>
-      <select id="pickup"><option>当日ブースで受け取り</option><option>後日発送（送料別）</option></select>
-      <span class="note">基本は当日、テントで目の前でレーザー加工してお渡しします。</span></label>
+    <p class="wait">ご注文の品は、当日ブースでお客さまの目の前でレーザー加工してお渡しします。受付番号が近くなったら、テントの近くでお待ちください。</p>
     <p class="err" id="ferr"></p>
     <button class="btn" type="submit">注文を送信</button>
     <button class="btn ghost" type="button" id="back">商品を追加する</button>
@@ -443,17 +441,15 @@ function renderCart(app){
     const nm=$("#name").value.trim(), tl=$("#tel").value.trim(), digits=tl.replace(/[-ー－\s()]/g,"").replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));
     if(!nm){ $("#ferr").textContent="お名前を入力してください"; $("#name").focus(); return; }
     if(!/^0\d{9,10}$/.test(digits)){ $("#ferr").textContent="電話番号を数字10〜11桁で入力してください（例：090-1234-5678）"; $("#tel").focus(); return; }
-    const order={お名前:nm,電話番号:digits,受け取り:$("#pickup").value,明細:cart.map(rowOf),合計:total()};
+    const order={お名前:nm,電話番号:digits,受け取り:"当日ブースで受け取り",明細:cart.map(rowOf),合計:total()};
     const btn=$("#form button[type=submit]");
     const finish=(no,sent)=>{
       view="done";
       app.innerHTML=`<section class="panel done">
         <span class="eyebrow">ご注文ありがとうございます</span>
         <span class="note">受付番号</span><span class="ticket">${esc(no)}</span>
-        ${order.受け取り.startsWith("当日")
-          ?`<p class="wait">当日、テントでお客さまの目の前でレーザー加工してお渡しします。<b>受付番号が近くなったら、テントの近くでお待ちください。</b></p>
-        <p>お呼びしたら、この画面をスタッフにお見せください。お会計は受け取り時です。</p>`
-          :`<p>この画面をブースのスタッフにお見せください。お会計は受け取り時です。</p>`}
+        <p class="wait">当日、テントでお客さまの目の前でレーザー加工してお渡しします。<b>受付番号が近くなったら、テントの近くでお待ちください。</b></p>
+        <p>お呼びしたら、この画面をスタッフにお見せください。お会計は受け取り時です。</p>
         ${sent?"":`<p class="proto">試作版のため、実際には送信されていません。本番では明細1件ごとにスプレッドシートへ1行追加されます。</p>
         <pre>${esc(JSON.stringify(order,null,2))}</pre>`}
         <button class="btn ghost" type="button" id="again">最初に戻る</button></section>`;
