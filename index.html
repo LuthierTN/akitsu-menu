@@ -94,6 +94,7 @@ textarea{resize:vertical;line-height:1.5}
 .bar-in{max-width:560px;width:100%;display:flex;gap:12px;align-items:center;justify-content:space-between;font-variant-numeric:tabular-nums}
 .bar button{font:inherit;font-weight:700;background:var(--surface);color:var(--indigo);border:0;border-radius:8px;padding:9px 16px;cursor:pointer}
 .done{text-align:center;align-items:center}
+.wait{background:var(--accent);color:var(--accent-ink);padding:12px 14px;border-radius:10px;line-height:1.7}
 .ticket{font-family:var(--display);font-size:44px;color:var(--accent);letter-spacing:.06em}
 pre{font-size:11px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;overflow-x:auto;text-align:left;margin:0;max-height:260px;width:100%}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -428,7 +429,8 @@ function renderCart(app){
     <label class="field" style="gap:4px"><span class="note">お名前<span class="req">必須</span></span><input type="text" id="name" required autocomplete="name" value="${esc(name)}"></label>
     <label class="field" style="gap:4px"><span class="note">電話番号<span class="req">必須</span></span><input type="tel" id="tel" required autocomplete="tel" inputmode="tel" placeholder="090-1234-5678" value="${esc(tel)}"></label>
     <label class="field" style="gap:4px"><span class="note">受け取り方法</span>
-      <select id="pickup"><option>当日ブースで受け取り</option><option>後日発送（送料別）</option></select></label>
+      <select id="pickup"><option>当日ブースで受け取り</option><option>後日発送（送料別）</option></select>
+      <span class="note">基本は当日、テントで目の前でレーザー加工してお渡しします。</span></label>
     <p class="err" id="ferr"></p>
     <button class="btn" type="submit">注文を送信</button>
     <button class="btn ghost" type="button" id="back">商品を追加する</button>
@@ -448,7 +450,10 @@ function renderCart(app){
       app.innerHTML=`<section class="panel done">
         <span class="eyebrow">ご注文ありがとうございます</span>
         <span class="note">受付番号</span><span class="ticket">${esc(no)}</span>
-        <p>この画面をブースのスタッフにお見せください。お会計は受け取り時です。</p>
+        ${order.受け取り.startsWith("当日")
+          ?`<p class="wait">当日、テントでお客さまの目の前でレーザー加工してお渡しします。<b>受付番号が近くなったら、テントの近くでお待ちください。</b></p>
+        <p>お呼びしたら、この画面をスタッフにお見せください。お会計は受け取り時です。</p>`
+          :`<p>この画面をブースのスタッフにお見せください。お会計は受け取り時です。</p>`}
         ${sent?"":`<p class="proto">試作版のため、実際には送信されていません。本番では明細1件ごとにスプレッドシートへ1行追加されます。</p>
         <pre>${esc(JSON.stringify(order,null,2))}</pre>`}
         <button class="btn ghost" type="button" id="again">最初に戻る</button></section>`;
