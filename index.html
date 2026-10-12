@@ -114,7 +114,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 
 <script>
 /* ===== 注文の送り先（Google Apps Script のウェブアプリURL）。空欄なら試作モード ===== */
-const ORDER_ENDPOINT = "";
+const ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbzo8GXt82DFRykqnmv0W2rk9sijKQEpzKo40QUTpCFuuhM4RMuExqnJj29_6BjSiRvk/exec";
 
 /* ===== 商品マスタ ===== */
 // 絵柄・枠の画像は線画の外形ぴったりで切り出し。ar = 幅÷高さ
@@ -282,7 +282,7 @@ function render(){
     <p class="subtitle">秋津まつり 2026 ブース＃18</p>
     <p class="note">商品を選んでカートに入れてください。何枚でもまとめて注文できます。注文後に表示される番号をブースでお伝えください。</p>
   </header>
-  <p class="proto">試作版：送信してもまだどこにも届きません。板ぬり絵以外は仮の内容です。</p>
+  <p class="proto">試作版：板ぬり絵以外は仮の内容です。</p>
   ${toast?`<p class="toast" role="status">${esc(toast)}</p>`:""}
   <details class="sample"><summary>板ぬり絵の完成例を見る</summary>
     <img src="img/sample.jpg" alt="レーザー彫刻した卵形プレートに色を塗った完成例" loading="lazy"></details>
