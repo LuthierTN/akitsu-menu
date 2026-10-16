@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>板ぬり絵 管理</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Dela+Gothic+One&display=swap">
+<style>
+/* スタッフ用：スマホ1列。上から 呼び出し番号 → 整理券の状態変更 → 待ち状況 → 在庫 → 処理ペース → 予想 */
+:root{
+  --bg:#f3f5f4; --surface:#ffffff; --ink:#1c2a33; --muted:#5b6b73; --line:#d5dcdc;
+  --indigo:#23435a; --accent:#d2492a; --accent-ink:#ffffff; --sel:#e6eef3; --ok:#2f7a4a; --warn:#b5651d;
+  --st-wait:#fff4c2; --st-work:#cfe2ff; --st-done:#d4edda; --st-cancel:#e0e0e0; --st-ink:#1c2a33;
+  --display:"Dela Gothic One","Zen Kaku Gothic New",system-ui,sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121a1f; --surface:#1b262d; --ink:#e7eef0; --muted:#9db0b8; --line:#2f3f48;
+  --indigo:#8fb6d1; --accent:#f06a48; --accent-ink:#1b1210; --sel:#24384a; --ok:#7fc79a; --warn:#e7a35f;
+  --st-wait:#4a4220; --st-work:#23395a; --st-done:#24452f; --st-cancel:#3a3f42; --st-ink:#e7eef0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121a1f; --surface:#1b262d; --ink:#e7eef0; --muted:#9db0b8; --line:#2f3f48;
+  --indigo:#8fb6d1; --accent:#f06a48; --accent-ink:#1b1210; --sel:#24384a; --ok:#7fc79a; --warn:#e7a35f;
+  --st-wait:#4a4220; --st-work:#23395a; --st-done:#24452f; --st-cancel:#3a3f42; --st-ink:#e7eef0; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;padding:0 16px 48px;font-variant-numeric:tabular-nums}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header{padding-top:18px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:400;font-size:22px;line-height:1.3;margin:0;color:var(--indigo)}
+h2{font-size:16px;margin:0;font-weight:700}
+p{margin:0}
+.note{font-size:12px;color:var(--muted)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input[type=text],input[type=password],input[type=time]{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+.num{width:7em}
+button{font:inherit;font-weight:700;border-radius:10px;padding:9px 14px;cursor:pointer;border:1px solid var(--indigo);background:transparent;color:var(--indigo)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.linkbtn{border:0;padding:4px 0;font-weight:400;font-size:13px;text-decoration:underline;color:var(--muted)}
+.call{display:flex;align-items:center;justify-content:center;gap:14px}
+.call button{width:56px;height:56px;font-size:24px;padding:0}
+.call output{font-family:var(--display);font-size:64px;line-height:1;color:var(--accent);min-width:2.5ch;text-align:center}
+.err{font-size:13px;color:var(--accent);min-height:1em}
+.ok{font-size:13px;color:var(--ok)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.tk{font:inherit;font-size:14px;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--st-ink)}
+.s-受付{background:var(--st-wait)} .s-加工中{background:var(--st-work)} .s-完了{background:var(--st-done)} .s-キャンセル{background:var(--st-cancel)}
+.lines{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.lines li{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:8px;color:var(--st-ink)}
+.stbtns{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.stbtns button{padding:10px 4px;color:var(--st-ink);border-color:var(--line)}
+.stbtns button[aria-pressed="true"]{outline:3px solid var(--indigo);outline-offset:-3px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:6px 4px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+thead th{font-size:12px;color:var(--muted);font-weight:500}
+td strong{font-size:18px}
+.warn{color:var(--warn);font-weight:700}
+.danger{color:var(--accent);font-weight:700}
+.stock{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stock .box{border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.stock .big{font-family:var(--display);font-size:34px;line-height:1.1}
+.stock .box .row input{width:4.5em}
+.stock .box .row button{padding:7px 10px;font-size:14px}
+@media (max-width:360px){.stock{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+/* 注文ページ（index.html）と同じ Apps Script のウェブアプリURL */
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbzo8GXt82DFRykqnmv0W2rk9sijKQEpzKo40QUTpCFuuhM4RMuExqnJj29_6BjSiRvk/exec";
+const SIZES = ["大","小"], STATUSES = ["受付","加工中","完了","キャンセル"];
+const PIN_KEY = "akitsuAdminPin", TARGET_KEY = "akitsuForecastUntil";
+const HOUR = 3600e3, REFRESH_MS = 30e3;
+
+const $ = (s, r=document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+const hm = t => { const d=new Date(t); return d.getHours()+":"+String(d.getMinutes()).padStart(2,"0"); };
+const toHalf = s => String(s).trim().replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0)-0xFEE0));
+const fmt1 = n => (Math.round(n*10)/10).toLocaleString("ja-JP");
+
+let pin = store.get(PIN_KEY) || "", data = null, loadedAt = 0, sel = null, msg = "", msgOk = false, busy = false, timer = null;
+let target = store.get(TARGET_KEY) || "16:00";
+
+async function api(body){
+  const r = await fetch(ENDPOINT, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({...body, pin})});
+  const res = await r.json();
+  if(!res.ok){
+    if(res.error==="unauthorized"){ pin=""; store.del(PIN_KEY); }
+    throw new Error(res.error||"error");
+  }
+  return res;
+}
+const ERRORS = {
+  unauthorized:"暗証番号が違います", "no pin":"暗証番号がまだ登録されていません（Apps Script で setAdminPin を実行してください）",
+  "not found":"その整理券番号の注文はありません", "invalid stock":"在庫数を0以上の整数で入力してください",
+  "invalid number":"呼び出し番号を0〜9999の数字で入力してください", "invalid status":"整理券番号を確認してください"
+};
+const errText = e => ERRORS[e.message] || "通信できませんでした。電波を確認して、もう一度お試しください";
+
+async function run(body, okText){
+  if(busy) return; busy=true; render();
+  try{ data = await api(body); loadedAt = Date.now(); msg = okText||""; msgOk = true; }
+  catch(e){ msg = errText(e); msgOk = false; }
+  busy=false; render();
+}
+const refresh = () => run({action:"dashboard"});
+
+/* ===== 集計（今日の分だけで計算） ===== */
+function stats(now){
+  const rows = data.rows, live = rows.filter(r => r.status!=="キャンセル");
+  const d0 = new Date(now); d0.setHours(0,0,0,0);
+  const today = live.filter(r => r.orderedAt >= d0.getTime());
+  const sum = (list, f) => list.filter(f).reduce((s,r)=>s+r.qty,0);
+  const first = today.length ? Math.min(...today.map(r=>r.orderedAt)) : null;
+  const span = first==null ? 0 : (now-first)/HOUR;
+  // 注文ペース：60分以上データがあれば直近60分、なければ最初の注文から（10分未満は10分とみなす）
+  const useLast = span >= 1, basisH = useLast ? 1 : Math.max(span, 1/6);
+  const out = {first, span, useLast, basisH, size:{}};
+  for(const sz of SIZES){
+    const mine = r => r.size===sz;
+    const ordered = sum(today, mine);
+    const recentOrdered = useLast ? sum(today, r => mine(r) && r.orderedAt >= now-HOUR) : ordered;
+    const orderRate = first==null ? 0 : recentOrdered / basisH;
+    const doneToday = sum(today, r => mine(r) && r.status==="完了" && r.doneAt >= d0.getTime());
+    const doneLastHour = sum(today, r => mine(r) && r.status==="完了" && r.doneAt >= now-HOUR);
+    const st = data.stock && data.stock[sz];
+    const planned = st ? sum(live, r => mine(r) && r.orderedAt >= st.setAt) : null;
+    out.size[sz] = {
+      ordered, orderRate, doneToday, doneLastHour,
+      doneRate: span>0 ? doneToday/Math.max(span,1/6) : 0,
+      waiting: sum(live, r => mine(r) && r.status==="受付"),
+      working: sum(live, r => mine(r) && r.status==="加工中"),
+      stock: st, planned, left: st ? st.count - planned : null
+    };
+  }
+  return out;
+}
+function targetTime(now){
+  const [h,m] = (target||"16:00").split(":").map(Number), t = new Date(now);
+  t.setHours(h||0, m||0, 0, 0); return t.getTime();
+}
+
+/* ===== 画面 ===== */
+function render(){
+  const app = $("#app");
+  if(!pin){ renderLogin(app); return; }
+  if(!data){ app.innerHTML = `<header><h1>板ぬり絵 管理</h1></header><p class="note">${busy?"読み込み中…":esc(msg)}</p>
+    ${!busy&&msg?`<button type="button" id="retry">もう一度読み込む</button>`:""}`;
+    const rb=$("#retry"); if(rb) rb.onclick=refresh; return; }
+  const now = Date.now(), S = stats(now), T = targetTime(now), hoursLeft = Math.max(0,(T-now)/HOUR);
+  const open = [...new Map(data.rows.filter(r=>r.status==="受付"||r.status==="加工中").map(r=>[r.ticket,r])).values()]
+    .sort((a,b)=>a.ticket-b.ticket);
+  const lines = sel==null ? [] : data.rows.filter(r=>r.ticket===sel);
+  const selStatus = lines.length && lines.every(r=>r.status===lines[0].status) ? lines[0].status : null;
+  const waitT = new Set(data.rows.filter(r=>r.status==="受付").map(r=>r.ticket)).size;
+  const workT = new Set(data.rows.filter(r=>r.status==="加工中").map(r=>r.ticket)).size;
+  const sz = k => SIZES.map(s => S.size[s][k]);
+
+  app.innerHTML = `
+  <header><h1>板ぬり絵 管理</h1>
+    <div class="row"><span class="note">${loadedAt?hm(loadedAt)+" 更新":""}</span>
+      <button type="button" id="reload" ${busy?"disabled":""}>${busy?"更新中…":"更新"}</button></div></header>
+  <p class="${msgOk?"ok":"err"}" role="status">${esc(msg)}</p>
+
+  <section class="panel"><h2>呼び出し番号</h2>
+    <div class="call"><button type="button" data-call="-1" aria-label="1つ戻す">−</button>
+      <output>${data.currentCall??"—"}</output><button type="button" data-call="1" aria-label="次の番号">＋</button></div>
+    <div class="row" style="justify-content:center"><input type="text" class="num" id="callIn" inputmode="numeric" placeholder="番号"><button type="button" id="callSet">この番号にする</button></div>
+  </section>
+
+  <section class="panel"><h2>整理券の状態を変える</h2>
+    <div class="row"><input type="text" class="num" id="tkIn" inputmode="numeric" placeholder="整理券番号" value="${sel??""}"><button type="button" id="tkGo">表示</button></div>
+    ${sel!=null?(lines.length?`
+      <p><b>No.${sel}</b>　${esc(lines[0].name)} さま</p>
+      <ul class="lines">${lines.map(r=>`<li class="s-${esc(r.status)}"><span>${esc(r.size)} ×${r.qty}　${esc(r.design)}${r.frame?" / 枠"+esc(r.frame):""}</span><b>${esc(r.status)}</b></li>`).join("")}</ul>
+      <div class="stbtns">${STATUSES.map(s=>`<button type="button" class="s-${s}" data-st="${s}" aria-pressed="${s===selStatus}" ${busy?"disabled":""}>${s}</button>`).join("")}</div>`
+      :`<p class="note">No.${sel} の注文はありません。</p>`):""}
+    ${open.length?`<p class="note">受付・加工中の整理券（タップで選択）</p>
+      <div class="chips">${open.map(r=>`<button type="button" class="tk s-${esc(r.status)}" data-tk="${r.ticket}">${r.ticket}</button>`).join("")}</div>`:`<p class="note">受付・加工中の整理券はありません。</p>`}
+  </section>
+
+  <section class="panel"><h2>待ち状況</h2>
+    <p>受付 <b>${waitT}</b> 件（大 ${S.size["大"].waiting}・小 ${S.size["小"].waiting} 枚）　加工中 <b>${workT}</b> 件（大 ${S.size["大"].working}・小 ${S.size["小"].working} 枚）</p>
+  </section>
+
+  <section class="panel"><h2>在庫</h2>
+    <div class="stock">${SIZES.map(s=>{ const x=S.size[s]; return `<div class="box">
+      <b>${s}</b>
+      ${x.stock?`<span class="big ${x.left<=0?"danger":x.left<=5?"warn":""}">残り ${x.left}</span>
+        <span class="note">登録 ${x.stock.count} 枚（${hm(x.stock.setAt)}）− 使用予定 ${x.planned} 枚</span>`
+        :`<span class="note">まだ登録されていません</span>`}
+      <div class="row"><input type="text" id="stIn-${s}" inputmode="numeric" placeholder="枚数" aria-label="${s}の枚数">
+        <button type="button" data-stock="${s}">登録</button>${x.stock?`<button type="button" data-add="${s}">追加</button>`:""}</div>
+    </div>`;}).join("")}</div>
+    <p class="note">「登録」＝いま手元にあって、これからの注文に使える枚数。「追加」＝補充した枚数を残りに足します。使用予定は、登録したあとの注文（キャンセル以外）の枚数です。</p>
+  </section>
+
+  <section class="panel"><h2>1時間あたりの処理数</h2>
+    <table><thead><tr><th></th><th>大</th><th>小</th><th>計</th></tr></thead><tbody>
+      <tr><td>本日平均</td>${sz("doneRate").map(v=>`<td><strong>${fmt1(v)}</strong></td>`).join("")}<td>${fmt1(sz("doneRate").reduce((a,b)=>a+b,0))}</td></tr>
+      <tr><td>直近1時間</td>${sz("doneLastHour").map(v=>`<td>${v}</td>`).join("")}<td>${sz("doneLastHour").reduce((a,b)=>a+b,0)}</td></tr>
+      <tr><td>本日の完了</td>${sz("doneToday").map(v=>`<td>${v}</td>`).join("")}<td>${sz("doneToday").reduce((a,b)=>a+b,0)}</td></tr>
+    </tbody></table>
+    <p class="note">${S.first==null?"今日の注文はまだありません。":`本日平均＝今日の完了枚数 ÷ 最初の注文（${hm(S.first)}）からの時間（${fmt1(S.span)}時間）`}</p>
+  </section>
+
+  <section class="panel"><h2>予想</h2>
+    <div class="row"><label for="target">何時まで：</label><input type="time" id="target" value="${esc(target)}" step="900"></div>
+    <table><thead><tr><th></th><th>大</th><th>小</th></tr></thead><tbody>
+      <tr><td>今の注文数</td>${sz("ordered").map(v=>`<td>${v}</td>`).join("")}</tr>
+      <tr><td>注文ペース（枚/時）</td>${sz("orderRate").map(v=>`<td>${fmt1(v)}</td>`).join("")}</tr>
+      <tr><td>${esc(target)} までの予想注文数</td>${SIZES.map(s=>{const x=S.size[s];return `<td><strong>${Math.round(x.ordered+x.orderRate*hoursLeft)}</strong></td>`;}).join("")}</tr>
+      <tr><td>在庫切れ予想</td>${SIZES.map(s=>`<td>${runOut(S.size[s],now,T)}</td>`).join("")}</tr>
+    </tbody></table>
+    <p class="note">${S.first==null?"注文が入ると計算します。":`注文ペースは${S.useLast?"直近60分":`最初の注文（${hm(S.first)}）から今まで`}の注文枚数から計算。予想注文数＝今の注文数＋注文ペース×残り${fmt1(hoursLeft)}時間。在庫切れ予想＝今＋在庫の残り÷注文ペース。`}</p>
+  </section>
+
+  <p class="row" style="justify-content:space-between"><span class="note">30秒ごとに自動で更新します。</span><button type="button" class="linkbtn" id="logout">暗証番号を入れ直す</button></p>`;
+  bind();
+}
+function runOut(x, now, T){
+  if(!x.stock) return `<span class="note">在庫未登録</span>`;
+  if(x.left<=0) return `<span class="danger">在庫切れ</span>`;
+  if(x.orderRate<=0) return "在庫切れの見込みなし";
+  const t = now + x.left/x.orderRate*HOUR;
+  return t > T ? "在庫切れの見込みなし" : `<span class="warn">${hm(t)} ごろ</span>`;
+}
+
+function renderLogin(app){
+  app.innerHTML = `<header><h1>板ぬり絵 管理</h1></header>
+  <form class="panel" id="login"><h2>暗証番号</h2>
+    <p class="note">スタッフ用の画面です。暗証番号を入れてください（この端末に記憶します）。</p>
+    <input type="password" id="pinIn" autocomplete="current-password" inputmode="numeric" required>
+    <p class="err">${esc(msg)}</p>
+    <button type="submit" class="primary">開く</button></form>`;
+  $("#login").onsubmit = e => { e.preventDefault(); const v=$("#pinIn").value.trim(); if(!v) return;
+    pin=v; store.set(PIN_KEY,v); data=null; msg=""; refresh().then(()=>{ if(pin) start(); }); };
+  $("#pinIn").focus();
+}
+
+function bind(){
+  $("#reload").onclick = refresh;
+  $("#logout").onclick = () => { pin=""; data=null; msg=""; store.del(PIN_KEY); stop(); render(); };
+  document.querySelectorAll("[data-call]").forEach(b => b.onclick = () => {
+    const n = Math.max(0, (data.currentCall||0) + Number(b.dataset.call));
+    run({action:"setCall", number:n}, `呼び出し番号を ${n} にしました`); });
+  $("#callSet").onclick = () => { const v=toHalf($("#callIn").value); if(!/^\d{1,4}$/.test(v)){ msg="呼び出し番号を数字で入力してください"; msgOk=false; render(); return; }
+    run({action:"setCall", number:+v}, `呼び出し番号を ${+v} にしました`); };
+  const pick = v => { v=toHalf(v); if(!/^\d{1,4}$/.test(v)||+v<1){ msg="整理券番号を数字で入力してください"; msgOk=false; render(); return; } sel=+v; msg=""; render(); };
+  $("#tkGo").onclick = () => pick($("#tkIn").value);
+  $("#tkIn").onkeydown = e => { if(e.key==="Enter") pick($("#tkIn").value); };
+  document.querySelectorAll("[data-tk]").forEach(b => b.onclick = () => pick(b.dataset.tk));
+  document.querySelectorAll("[data-st]").forEach(b => b.onclick = () =>
+    run({action:"setStatus", ticket:sel, status:b.dataset.st}, `No.${sel} を「${b.dataset.st}」にしました`));
+  const num = s => { const v=toHalf($("#stIn-"+s).value); return /^\d{1,4}$/.test(v) ? +v : null; };
+  document.querySelectorAll("[data-stock]").forEach(b => b.onclick = () => { const s=b.dataset.stock, n=num(s);
+    if(n==null){ msg="在庫数を数字で入力してください"; msgOk=false; render(); return; }
+    run({action:"setStock", size:s, count:n}, `${s}の在庫を ${n} 枚で登録しました`); });
+  document.querySelectorAll("[data-add]").forEach(b => b.onclick = () => { const s=b.dataset.add, n=num(s), left=stats(Date.now()).size[s].left;
+    if(n==null){ msg="追加する枚数を数字で入力してください"; msgOk=false; render(); return; }
+    const total=Math.max(0,left)+n;
+    run({action:"setStock", size:s, count:total}, `${s}に ${n} 枚追加しました（残り ${total} 枚）`); });
+  $("#target").onchange = e => { target=e.target.value||"16:00"; store.set(TARGET_KEY,target); render(); };
+}
+
+// 入力中は画面を描き直さない（打ちかけの数字が消えないように）
+const typing = () => { const a=document.activeElement; return a && a.tagName==="INPUT" && a.value!==""; };
+function start(){ stop(); timer = setInterval(() => { if(!busy && !document.hidden && !typing()) refresh(); }, REFRESH_MS); }
+function stop(){ if(timer) clearInterval(timer); timer=null; }
+document.addEventListener("visibilitychange", () => { if(!document.hidden && pin && Date.now()-loadedAt > REFRESH_MS) refresh(); });
+
+render();
+if(pin){ refresh(); start(); }
+</script>
+</body>
+</html>

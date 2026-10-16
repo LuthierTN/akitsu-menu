@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>秋津手作り革工房 メニュー</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@500;700&family=Zen+Old+Mincho:wght@700&display=swap">
 <style>
 /* Layout: one narrow phone column, product list -> configurator with true-scale egg preview -> cart bar fixed at bottom */
 :root{
@@ -55,6 +55,7 @@ details.sample img{border-radius:8px;margin-top:10px;display:block}
 .chip small{opacity:.75;margin-left:4px}
 .chip.f-maru{font-family:"Zen Maru Gothic",sans-serif;font-weight:700}
 .chip.f-goth{font-weight:700}
+.chip.f-mincho{font-family:"Zen Old Mincho","Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;font-weight:700}
 .preview{display:flex;justify-content:center;align-items:flex-end;gap:16px;flex-wrap:wrap;padding:4px 0}
 .preview figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:4px}
 .preview figcaption{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
@@ -124,7 +125,8 @@ const DESIGNS = [
 ].map(([no,name,ar])=>({id:no, name:`${no} ${name}`, img:`img/d${no}.png`, ar}));
 const FRAMES = [["A",1.136],["B",1.231],["C",1.106],["D",1.147],["E",1.038],["F",1.049]]
   .map(([k,ar])=>({id:k, name:`枠${k}`, img:`img/f${k}.png`, ar}));
-const FONTS = [{id:"goth",name:"ゴシック",css:"'Zen Kaku Gothic New',sans-serif"},{id:"maru",name:"丸文字",css:"'Zen Maru Gothic',sans-serif"}];
+const FONTS = [{id:"goth",name:"ゴシック",css:"'Zen Kaku Gothic New',sans-serif"},{id:"maru",name:"丸文字",css:"'Zen Maru Gothic',sans-serif"},
+  {id:"mincho",name:"明朝",css:"'Zen Old Mincho','Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif"}];
 // 完成品のスキャン画像から切り出した塗り例。size: l/s, d: 絵柄番号, f: 枠
 const EXAMPLES = [
   [1,"l","1","D"],[2,"l","4","C"],[3,"l","12","E"],[4,"l","5","D"],[5,"l","12","E"],
@@ -280,7 +282,7 @@ function render(){
   <header>
     <h1>秋津手作り革工房<br>メニュー</h1>
     <p class="subtitle">秋津まつり 2026 ブース＃18</p>
-    <p class="note">商品を選んでカートに入れてください。何枚でもまとめて注文できます。注文後に表示される番号をブースでお伝えください。</p>
+    <p class="note">商品を選んでカートに入れてください。何枚でもまとめて注文できます。注文のときに、お手元の整理券の番号を入力してください。</p>
   </header>
   <p class="proto">試作版：板ぬり絵以外は仮の内容です。</p>
   ${toast?`<p class="toast" role="status">${esc(toast)}</p>`:""}
@@ -415,7 +417,7 @@ function updateBar(){
 $("#toCart").onclick=()=>{view="cart";render();window.scrollTo(0,0);};
 
 function renderCart(app){
-  const name=$("#name")?.value??"", tel=$("#tel")?.value??"";
+  const name=$("#name")?.value??"", ticket=$("#ticket")?.value??"";
   app.innerHTML=`
   <header><span class="eyebrow">カート</span><h1>ご注文内容</h1></header>
   <ul class="cart">${cart.map((c,i)=>`<li>
@@ -427,8 +429,8 @@ function renderCart(app){
   <form class="panel" id="form" novalidate>
     <h2>お客さま情報</h2>
     <label class="field" style="gap:4px"><span class="note">お名前<span class="req">必須</span></span><input type="text" id="name" required autocomplete="name" value="${esc(name)}"></label>
-    <label class="field" style="gap:4px"><span class="note">電話番号<span class="req">必須</span></span><input type="tel" id="tel" required autocomplete="tel" inputmode="tel" placeholder="090-1234-5678" value="${esc(tel)}"></label>
-    <p class="wait">ご注文の品は、当日ブースでお客さまの目の前でレーザー加工してお渡しします。受付番号が近くなったら、テントの近くでお待ちください。</p>
+    <label class="field" style="gap:4px"><span class="note">整理券番号<span class="req">必須</span>（ブースでお渡しした整理券の番号）</span><input type="text" id="ticket" required inputmode="numeric" autocomplete="off" maxlength="4" placeholder="例：12" value="${esc(ticket)}"></label>
+    <p class="wait">ご注文の品は、当日ブースでお客さまの目の前でレーザー加工してお渡しします。呼び出し番号が整理券の番号に近くなったら、テントの近くでお待ちください。</p>
     <p class="err" id="ferr"></p>
     <button class="btn" type="submit">注文を送信</button>
     <button class="btn ghost" type="button" id="back">商品を追加する</button>
@@ -438,30 +440,32 @@ function renderCart(app){
   $("#back").onclick=()=>{view="shop";render();};
   $("#form").onsubmit=e=>{
     e.preventDefault();
-    const nm=$("#name").value.trim(), tl=$("#tel").value.trim(), digits=tl.replace(/[-ー－\s()]/g,"").replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));
+    const nm=$("#name").value.trim(), tk=$("#ticket").value.trim().replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));
     if(!nm){ $("#ferr").textContent="お名前を入力してください"; $("#name").focus(); return; }
-    if(!/^0\d{9,10}$/.test(digits)){ $("#ferr").textContent="電話番号を数字10〜11桁で入力してください（例：090-1234-5678）"; $("#tel").focus(); return; }
-    const order={お名前:nm,電話番号:digits,受け取り:"当日ブースで受け取り",明細:cart.map(rowOf),合計:total()};
+    if(!/^\d{1,4}$/.test(tk)||+tk<1){ $("#ferr").textContent="整理券番号を数字で入力してください（例：12）"; $("#ticket").focus(); return; }
+    const order={お名前:nm,整理券番号:+tk,受け取り:"当日ブースで受け取り",明細:cart.map(rowOf),合計:total()};
     const btn=$("#form button[type=submit]");
     const finish=(no,sent)=>{
       view="done";
       app.innerHTML=`<section class="panel done">
         <span class="eyebrow">ご注文ありがとうございます</span>
-        <span class="note">受付番号</span><span class="ticket">${esc(no)}</span>
-        <p class="wait">当日、テントでお客さまの目の前でレーザー加工してお渡しします。<b>受付番号が近くなったら、テントの近くでお待ちください。</b></p>
-        <p>お呼びしたら、この画面をスタッフにお見せください。お会計は受け取り時です。</p>
+        <span class="note">整理券番号</span><span class="ticket">${esc(no)}</span>
+        <p class="wait">当日、テントでお客さまの目の前でレーザー加工してお渡しします。<b>呼び出し番号が近くなったら、テントの近くでお待ちください。</b></p>
+        <p>お呼びしたら、整理券とこの画面をスタッフにお見せください。お会計は受け取り時です。</p>
         ${sent?"":`<p class="proto">試作版のため、実際には送信されていません。本番では明細1件ごとにスプレッドシートへ1行追加されます。</p>
         <pre>${esc(JSON.stringify(order,null,2))}</pre>`}
         <button class="btn ghost" type="button" id="again">最初に戻る</button></section>`;
       $("#bar").hidden=true;
       $("#again").onclick=()=>{cart=[];cur=null;view="shop";render();window.scrollTo(0,0);};
     };
-    if(!ORDER_ENDPOINT){ finish("A-"+String(Math.floor(Math.random()*900)+100),false); return; }
+    if(!ORDER_ENDPOINT){ finish(+tk,false); return; }
     btn.disabled=true; btn.textContent="送信中…"; $("#ferr").textContent="";
     // text/plain で送ると Apps Script でも事前確認なしで受け付けられる
     fetch(ORDER_ENDPOINT,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(order)})
-      .then(r=>r.json()).then(res=>{ if(!res.ok) throw new Error(res.error||"error"); finish(res.orderNo,true); })
-      .catch(()=>{ btn.disabled=false; btn.textContent="注文を送信"; $("#ferr").textContent="送信できませんでした。電波の良い場所でもう一度お試しいただくか、スタッフにお声がけください。"; });
+      .then(r=>r.json()).then(res=>{ if(!res.ok) throw new Error(res.error||"error"); finish(res.ticket??+tk,true); })
+      .catch(err=>{ btn.disabled=false; btn.textContent="注文を送信";
+        if(err.message==="duplicate"){ $("#ferr").textContent="この整理券番号はすでに使われています。番号をご確認ください"; $("#ticket").focus(); return; }
+        $("#ferr").textContent="送信できませんでした。電波の良い場所でもう一度お試しいただくか、スタッフにお声がけください。"; });
   };
   updateBar();
 }
