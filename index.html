@@ -25,7 +25,7 @@
   --mdf:#cdb48c; --mdf-edge:#8d7350; --paper:#e9dfcb; --engrave:#3a2a18; --ok:#7fc79a; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;padding-inline:16px;padding-block:0 120px}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.9;padding-inline:16px;padding-block:0 120px}
 .wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
 header{padding-block:20px 4px;display:flex;flex-direction:column;gap:4px}
 .eyebrow{font-size:12px;letter-spacing:.12em;color:var(--muted)}
@@ -104,6 +104,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .ex img{width:100%;height:92px;object-fit:contain;border-radius:6px;display:block;background:#fff}
 .ex span{font-size:11px;color:var(--muted)}
 .ex[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+/* ふりがな：漢字の上に小さく。body.noruby で隠す */
+ruby{ruby-position:over;ruby-align:center}
+rt{font-size:.5em;line-height:1;font-weight:400;letter-spacing:-.04em;font-family:var(--body)}
+body.noruby rt{display:none}
+.furi{font:inherit;font-size:12px;align-self:flex-start;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 12px;cursor:pointer}
+.furi[aria-pressed="true"]{color:var(--indigo);border-color:var(--indigo)}
 .exbig{width:100%;max-width:360px;background:#fff;padding:8px;align-self:center;border-radius:12px;display:block}
 @media (max-width:380px){.tiles{grid-template-columns:repeat(3,1fr)}}
 </style>
@@ -280,6 +286,7 @@ function render(){
   const p=cur?prodOf(cur):null;
   app.innerHTML=`
   <header>
+    <button type="button" class="furi" id="furi" aria-pressed="${furiOn}">ふりがな ${furiOn?"あり":"なし"}</button>
     <h1>秋津手作り革工房<br>メニュー</h1>
     <p class="subtitle">秋津まつり 2026 ブース＃18</p>
     <p class="note">商品を選んでカートに入れてください。何枚でもまとめて注文できます。注文のときに、お手元の整理券の番号を入力してください。</p>
@@ -298,6 +305,7 @@ function render(){
   </section>
   ${p?configHtml(p):""}`;
   toast="";
+  $("#furi").onclick=()=>{furiOn=!furiOn; try{localStorage.setItem("akitsuFuri",furiOn?"1":"0");}catch(e){} applyFuri(); render();};
   app.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{cur=newConfig(CATALOG.find(x=>x.id===b.dataset.p));render();$("#cfg").scrollIntoView({behavior:"smooth",block:"start"});});
   if(p) bindConfig();
   updateBar();
@@ -315,7 +323,7 @@ function configHtml(p){
   const sideBox=(k,label)=>{
     const lim=v.engrave[k], on=k==="front"?cur.engFront:cur.engBack, val=cur[k];
     return `<div class="side">
-      <label class="tog"><input type="checkbox" id="on-${k}" data-on="${k}" ${on?"checked":""}>${label}に文字を入れる<small class="note">+${yen(v.engrave.fee)}</small></label>
+      <label class="tog"><input type="checkbox" id="on-${k}" data-on="${k}" ${on?"checked":""}><span>${label}に文字を入れる</span><small class="note">+${yen(v.engrave.fee)}</small></label>
       <span class="note">最大${lim.lines}行・1行${lim.chars}文字まで</span>
       ${on?`<textarea id="t-${k}" data-t="${k}" rows="${lim.lines}" placeholder="${k==="front"?"例：Alice":"例：2026.10 秋津まつり"}">${esc(val)}</textarea>
       <span class="count" id="cnt-${k}">${countText(val,lim)}</span>`:""}
@@ -331,7 +339,7 @@ function configHtml(p){
     ${egg?`<div class="preview" id="preview">${previewHtml()}</div>
     <div class="row" style="justify-content:center;align-items:center">
       <button type="button" class="chip" id="retint">ぬり絵イメージの色を変える</button>
-      <label class="note" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="showColor" ${showColor?"checked":""}>色つきで表示</label></div>
+      <label class="note" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="showColor" ${showColor?"checked":""}><span>色つきで表示</span></label></div>
     <p class="note" style="text-align:center;margin-top:-10px">色はイメージです。実際の彫刻は線だけで、色はご自身で塗ります。</p>
     <div class="field" id="examples">${examplesHtml()}</div>
     <div class="field"><h3>絵柄（1つ選んでください）</h3>
@@ -469,6 +477,58 @@ function renderCart(app){
   };
   updateBar();
 }
+
+/* ===== ふりがな =====
+   画面に出る漢字に、辞書の読みでルビを振る。{漢字|よみ} の形で書き、送りがなは外に出す。
+   長い語から先に当てはめるので「大きく」「大」のように読みが違う語は長いほうに書く。 */
+const FURI = {
+  "秋津":"{秋津|あきつ}", "手作り":"{手作|てづく}り", "革工房":"{革|かわ}{工房|こうぼう}", "革製品":"{革製品|かわせいひん}", "革":"{革|かわ}",
+  "商品":"{商品|しょうひん}", "品":"{品|しな}", "注文":"{注文|ちゅうもん}", "内容":"{内容|ないよう}", "準備中":"{準備中|じゅんびちゅう}", "仮":"{仮|かり}",
+  "試作版":"{試作版|しさくばん}", "以外":"{以外|いがい}", "板":"{板|いた}", "絵柄":"{絵柄|えがら}", "絵":"{絵|え}", "完成例":"{完成例|かんせいれい}",
+  "卵形":"{卵形|たまごがた}", "彫刻":"{彫刻|ちょうこく}", "彫り方":"{彫|ほ}り{方|かた}", "彫り":"{彫|ほ}り", "玩具":"{玩具|がんぐ}",
+  "動く":"{動|うご}く", "関節":"{関節|かんせつ}", "恐竜":"{恐竜|きょうりゅう}", "大きく":"{大|おお}きく", "大":"{大|だい}", "小計":"{小計|しょうけい}", "小":"{小|しょう}",
+  "幅":"{幅|はば}", "高さ":"{高|たか}さ", "枠":"{枠|わく}", "選ん":"{選|えら}ん", "選べ":"{選|えら}べ", "選ぶ":"{選|えら}ぶ", "種類":"{種類|しゅるい}",
+  "色":"{色|いろ}", "赤":"{赤|あか}", "青":"{青|あお}", "黄":"{黄|き}", "緑":"{緑|みどり}", "白":"{白|しろ}", "変える":"{変|か}える",
+  "表示":"{表示|ひょうじ}", "表":"{表|おもて}", "裏":"{裏|うら}", "実際":"{実際|じっさい}", "線":"{線|せん}", "自身":"{自身|じしん}", "塗":"{塗|ぬ}",
+  "塗り例":"{塗|ぬ}り{例|れい}", "同じ":"{同|おな}じ", "写真":"{写真|しゃしん}", "文字":"{文字|もじ}", "入れ":"{入|い}れ", "入力":"{入力|にゅうりょく}",
+  "最大":"{最大|さいだい}", "行目":"{行目|ぎょうめ}", "行":"{行|ぎょう}", "超え":"{超|こ}え", "書体":"{書体|しょたい}", "明朝":"{明朝|みんちょう}",
+  "丸文字":"{丸文字|まるもじ}", "中抜き":"{中|なか}{抜|ぬ}き", "枚数":"{枚数|まいすう}", "何枚":"{何枚|なんまい}", "枚":"{枚|まい}", "個":"{個|こ}",
+  "点":"{点|てん}", "残":"{残|ざん}", "合計":"{合計|ごうけい}", "単価":"{単価|たんか}", "削除":"{削除|さくじょ}", "増やす":"{増|ふ}やす", "減らす":"{減|へ}らす",
+  "追加":"{追加|ついか}", "続け":"{続|つづ}け", "見る":"{見|み}る", "見せ":"{見|み}せ", "進め":"{進|すす}め", "客":"{客|きゃく}", "情報":"{情報|じょうほう}",
+  "名前":"{名前|なまえ}", "必須":"{必須|ひっす}", "整理券":"{整理券|せいりけん}", "番号":"{番号|ばんごう}", "手元":"{手元|てもと}", "例":"{例|れい}",
+  "数字":"{数字|すうじ}", "当日":"{当日|とうじつ}", "目":"{目|め}", "前":"{前|まえ}", "加工":"{加工|かこう}", "渡し":"{渡|わた}し", "呼び":"{呼|よ}び", "出し":"{出|だ}し",
+  "近く":"{近|ちか}く", "待ち":"{待|ま}ち", "画面":"{画面|がめん}", "会計":"{会計|かいけい}", "受け取り":"{受|う}け{取|と}り", "時です":"{時|とき}です",
+  "送信中":"{送信中|そうしんちゅう}", "送信":"{送信|そうしん}", "使われ":"{使|つか}われ", "確認":"{確認|かくにん}", "最初":"{最初|さいしょ}", "戻る":"{戻|もど}る",
+  "電波":"{電波|でんぱ}", "良い":"{良|よ}い", "場所":"{場所|ばしょ}", "一度":"{一度|いちど}", "試し":"{試|ため}し", "声":"{声|こえ}", "拡大":"{拡大|かくだい}",
+  "本番":"{本番|ほんばん}", "明細":"{明細|めいさい}", "件":"{件|けん}", "下":"{下|した}"
+};
+const FURI_KEYS = Object.keys(FURI).sort((a,b)=>b.length-a.length);
+const KANJI = /[\u3005\u4e00-\u9fff]/;
+const SKIP_FURI = "ruby,rt,svg,script,style,textarea,pre,.glyph,.ticket";
+let furiOn = (()=>{ try{ return localStorage.getItem("akitsuFuri")!=="0"; }catch(e){ return true; } })();
+function furiHtml(text){
+  let out="", i=0;
+  while(i<text.length){
+    const k = KANJI.test(text[i]) ? FURI_KEYS.find(k=>text.startsWith(k,i)) : null;
+    if(k){ out += FURI[k].replace(/\{(.+?)\|(.+?)\}/g,"<ruby>$1<rt>$2</rt></ruby>"); i += k.length; }
+    else { out += esc(text[i]); i++; }
+  }
+  return out;
+}
+function furi(root){
+  const w=document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {acceptNode:n=>
+    KANJI.test(n.nodeValue) && !n.parentElement.closest(SKIP_FURI) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT});
+  const nodes=[]; while(w.nextNode()) nodes.push(w.currentNode);
+  nodes.forEach(n=>{ const h=furiHtml(n.nodeValue); if(!h.includes("<ruby>")) return; // 辞書にない漢字だけなら触らない（無限ループ防止）
+    const t=document.createElement("template"); t.innerHTML=h; n.replaceWith(t.content); });
+}
+function applyFuri(){ document.body.classList.toggle("noruby", !furiOn); }
+// 描き直しやメッセージの書き換えのたびに、新しく出た漢字へルビを振る
+new MutationObserver(ms=>ms.forEach(m=>{
+  m.addedNodes.forEach(n=>{ if(n.nodeType===1) furi(n); else if(n.nodeType===3 && n.parentElement) furi(n.parentElement); });
+  if(m.type==="characterData" && m.target.parentElement) furi(m.target.parentElement);
+})).observe(document.body,{childList:true,subtree:true,characterData:true});
+applyFuri(); furi(document.body);
 
 /* 初期表示：板ぬり絵（大）を選んだ状態で開く */
 cur=newConfig(CATALOG[0]); cur.design="9"; cur.frame="C";
